@@ -11,6 +11,12 @@
 int main(void)
 {
     // Your code here    
-
+    int rc = fork();
+    if (rc == 0) {
+        char *args[0];
+        execv("/bin/ls", args);
+    } else {
+        int wc = waitpid(rc, NULL, 0);
+    }
     return 0;
 }
