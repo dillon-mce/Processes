@@ -1,0 +1,2 @@
+This is a test string from the parent process.
+This is a test string from the child process.
