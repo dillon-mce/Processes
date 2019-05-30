@@ -16,7 +16,6 @@ char* msg3 = "hello world #3";
 
 int main(void)
 {
-    // Your code here
     int pipe1[2];
 
     pipe(pipe1);
