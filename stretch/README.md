@@ -66,16 +66,19 @@ simulated bank account, that is. Don't get your hopes up.)
 1. **Short answer**: How can things go wrong if two processes attempt the
    above plan at the same time? Is there more than one way things can go
    wrong?
+   > If they one process reads the balance, and goes to write to it, and then another process tries to read from it, before the first file has written to it, it has wrong information.
 
 2. Study and understand the skeleton code in the `src/` directory.
 
    **Short answer**: what do each of the arguments to `open()` mean?
+   > The first argument is the filename to open/create. The second argument says to create a new file if one doesn't already exist, and to open it for reading and writing. The third argument says to set the permission to 0644, which as far as I can tell is: "-rw-r--r--"
 
 3. Take the skeleton code in the `src/` directory and implement the
    pieces marked. Run it.
    
    **Short answer**: What happens? Do things go as planned and look
    sensible? What do you speculate is happening?
+   > Each process on its own does the right thing, but because some of the processes are running at the same time, the read value of the current balance doesn't always reflect money that has already been withdrawn.
 
 4. Add calls to [`flock()`](https://linux.die.net/man/2/flock) to
    capture and release an exclusive lock on the file before reading and
@@ -86,6 +89,7 @@ simulated bank account, that is. Don't get your hopes up.)
 5. **Short answer**: Why is it working? How has adding locks fixed the
    problems you noted in question 1? How is overall performance of the
    application affected?
+   > I'm not totally sure if I've place the locks correctly. I thought I would just need to place them around the writing portion, but that was not working, so they are placed around the whole time each process has the file open. Since that is pretty much all of each process, it seems to me that this has pretty much made this a serial process, even though we are using multiple processes. 
 
 
 ## Stretch Goals
