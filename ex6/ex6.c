@@ -20,7 +20,25 @@ and `clock_gettime()` should work just fine.
 
 int main()
 {
-    // Your code here
-    
+    uint64_t diff, average;
+	struct timespec start, end;
+    uint64_t total = 0;
+
+
+
+    for (int i = 0; i < number_iter; i++) {
+        clock_gettime(CLOCK_REALTIME, &start);
+        write(1, NULL, 0);
+        clock_gettime(CLOCK_REALTIME, &end);
+
+        diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
+        total += diff;
+    }
+    average = total / number_iter;
+    printf("Total time = %llu nanoseconds\n", (long long unsigned int) total);
+    printf("Average time = %llu nanoseconds\n", (long long unsigned int) average);
+
     return 0;
 }
+
+// Interestingly, it takes about twice as long if I use CLOCK_PROCESS_CPUTIME_ID, as opposed to CLOCK_REALTIME or CLOCK_MONOTONIC

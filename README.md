@@ -93,7 +93,7 @@ Here, the `waitpid()` function suspends the parent process until the child proce
 
 ## `exec()`
 The `exec()` system call is used in order to run a program that is different from the calling program (since `fork` only executes copies of the program that called it). 
-Let's say we wanted to spin up a child process to execute a word count program. Here's how what a program that does that might look like:
+Let's say we wanted to spin up a child process to execute a word count program. Here's what a program that does that might look like:
 ```c
 // p3.c
 #include <stdio.h>

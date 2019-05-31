@@ -70,7 +70,7 @@ void read_balance(int fd, int *balance)
 	// Read the balance into a buffer
 	int bytes_read = read(fd, buffer, sizeof buffer);
 	buffer[bytes_read] = '\0';
-
+	
 	// Error check
 	if (bytes_read < 0) {
 		perror("read");
@@ -84,14 +84,10 @@ void read_balance(int fd, int *balance)
 /**
  * Returns a random amount between 0 and 999.
  */
-int get_random_amount(void)
-{
-	// vvvvvvvvvvvvvvvvvv
-	// !!!! IMPLEMENT ME:
+int get_random_amount_of_money(void) {
 
-	// Return a random number between 0 and 999 inclusive using rand()
-
-	// ^^^^^^^^^^^^^^^^^^
+	int randomNumber = (rand() % 1999) - 999;
+	return randomNumber;
 }
 
 /**
@@ -103,7 +99,10 @@ int main(int argc, char **argv)
 	
 	// vvvvvvvvvvvvvvvvvv
 	// !!!! IMPLEMENT ME:
-
+	if (argc != 2) {
+		fprintf(stderr, "You need to input a number of bankers.\nusage: bankers numprocesses\n");
+		exit(1);
+	}
 	// We expect the user to add the number of simulataneous processes
 	// after the command name on the command line.
 	//
@@ -119,8 +118,14 @@ int main(int argc, char **argv)
 	
 	// Store the number of processes in this variable:
 	// How many processes to fork at once
-	int num_processes = IMPLEMENT ME
+	int num_processes;
+	sscanf(argv[1], "%d", &num_processes);
+	printf("You selected %d bankers\n", num_processes);
 
+	if (num_processes < 1 ) {
+		fprintf(stderr, "bankers: num processes must be greater than 0\n");
+		exit(2);
+	}
 	// Make sure the number of processes the user specified is more than
 	// 0 and print an error to stderr if not, then exit with status 2:
 	//
@@ -132,7 +137,6 @@ int main(int argc, char **argv)
 	int fd = open_balance_file(BALANCE_FILE);
 	write_balance(fd, 10000);
 	close_balance_file(fd);
-
 	// Rabbits, rabbits, rabbits!
 	for (int i = 0; i < num_processes; i++) {
 		if (fork() == 0) {
@@ -142,13 +146,29 @@ int main(int argc, char **argv)
 			srand(getpid());
 
 			// Get a random amount of cash to withdraw. YOLO.
-			int amount = get_random_amount();
-
+			int amount = get_random_amount_of_money();
 			int balance;
 
 			// vvvvvvvvvvvvvvvvvvvvvvvvv
 			// !!!! IMPLEMENT ME
+			int balanceFile = open_balance_file(BALANCE_FILE);
+			flock(balanceFile, LOCK_EX);
+			read_balance(balanceFile, &balance);
+			if (amount <= balance) {
+				int startingBalance = balance;
+				balance -= amount;
+				write_balance(balanceFile, balance);
+				if (amount < 0) {
+					printf("Started with $%d\tdeposited $%d\t new balance $%d\n", startingBalance, amount*-1, balance);
+				} else {
+					printf("Started with $%d\twithdrew  $%d\t new balance $%d\n", startingBalance, amount, balance);
+				}
+			} else {
+				printf("Only have $%d, can't withdraw $%d\n", balance, amount);
+			}
 
+			close_balance_file(balanceFile);
+			flock(balanceFile, LOCK_UN);
 			// Open the balance file (feel free to call the helper
 			// functions, above).
 
@@ -173,6 +193,5 @@ int main(int argc, char **argv)
 	for (int i = 0; i < num_processes; i++) {
 		wait(NULL);
 	}
-
 	return 0;
 }
